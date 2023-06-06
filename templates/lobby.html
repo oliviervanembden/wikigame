@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lobby</title>
+        <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+      integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+      crossorigin="anonymous"
+
+    ></script>
+
+</head>
+<body>
+
+<center>
+  <h1>WikiGame</h1>
+    <h2>game code: {{code}}</h2>
+
+    <p>players:</p>
+</center>
+
+<div class="player-box">
+    <center>
+        <div class="players" id="players"></div>
+    </center>
+</div>
+
+<script type="text/javascript">
+  var socketio = io();
+  const players = document.getElementById("players");
+
+  const addPlayer = (name) => {
+    const content = `
+    <div class="text">
+        <span>
+            <strong>${name}</strong
+        </span>
+    </div>
+    `;
+    players.innerHTML += content;
+  };
+   socketio.on("addUser", (data) => {
+    addPlayer(data);
+    console.log(data);
+  });
+    socketio.emit("join", { userID:{{userID}},gameCode:"{{code}}" });
+  socketio.on("startGame", (data) => {
+  console.log("stated game");
+  window.location.href="game";
+
+  });
+
+</script>
+
+
+{% for player in players %}
+<script type="text/javascript">
+  addPlayer("{{player}}");
+</script>
+{% endfor %}
+
+
+  {% if owner %}
+
+<button style="text-align:center" onclick='socketio.emit("start", {gameCode:"{{code}}" })'>start game</button>
+{% endif %}
+
+</body>
+</html>

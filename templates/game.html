@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+
+    var socket = io();
+    socket.on('connect', function() {
+        socket.emit('my event', {data: 'I\'m connected!'});
+    });
+
+</script>
+</head>
+<body>
+
+<h1 id="first2">Enter wikipedia Article</h1>
+<script>
+    var socketio = io();
+    function sendArt(){
+
+     socketio.emit("addArt", {userID:{{userID}},art:document.getElementById("artName").value});
+     document.getElementById("first0").style.display = "none";
+     document.getElementById("artName").style.display = "none";
+     document.getElementById("first1").style.display = "none";
+     document.getElementById("first2").style.display = "none";
+       socketio.on("startRound", (data) => {
+       if data.
+  });
+    }
+
+</script>
+
+<label id="first0" for="artical">artical name:</label>
+<input  type="text" id="artName" name="artName"><br><br>
+<button id="first1" onclick="sendArt()">Submit</button>
+
+
+</body>
+</html>
