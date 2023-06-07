@@ -25,9 +25,14 @@
      document.getElementById("artName").style.display = "none";
      document.getElementById("first1").style.display = "none";
      document.getElementById("first2").style.display = "none";
-       socketio.on("startRound", (data) => {
-       if data.
-  });
+    socketio.on("startRound", (data) => {
+        var artName = data.art;
+        var guessrUserID = data.guessr;
+
+        // Voeg de waarden toe aan de gewenste HTML-elementen
+        document.getElementById("artNameDisplay").textContent = "Artikelnaam: " + artName;
+        document.getElementById("guesserDisplay").textContent = "Rader UserID: " + guessrUserID;
+    });
     }
 
 </script>
@@ -35,6 +40,9 @@
 <label id="first0" for="artical">artical name:</label>
 <input  type="text" id="artName" name="artName"><br><br>
 <button id="first1" onclick="sendArt()">Submit</button>
+<!-- Voeg elementen toe om de ontvangen data weer te geven -->
+<p id="artNameDisplay"></p>
+<p id="guesserDisplay"></p>
 
 
 </body>
