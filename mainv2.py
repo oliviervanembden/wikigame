@@ -44,22 +44,21 @@ class wikigame:
         self.players.remove(userID)
 
     def addArtical(self, name, ownerid):
-        if ownerid in self.players:
-            self.articals[ownerid] = name
-            return True
-        else:
-            return False
+        self.articals[ownerid] = name
 
     def getArtical(self, userID):
         if userID in self.players:
             temp = self.articals
-            del temp[userID]
+            print(temp)
+            temp.pop(userID)
             art = random.choice(list(temp.items()))
             print(art)
             return art
         else:
             return "game not joined"
     def check(self):
+        print(len(self.articals))
+        print(len(self.players))
         if len(self.articals) == len(self.players):
             return True
         else:
