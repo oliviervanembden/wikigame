@@ -3,47 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-<script type="text/javascript" charset="utf-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
 
-    var socket = io();
-    socket.on('connect', function() {
-        socket.emit('my event', {data: 'I\'m connected!'});
-    });
+        var socket = io();
+        socket.on('connect', function() {
+            socket.emit('my event', {data: 'I\'m connected!'});
+        });
 
-</script>
+    </script>
 </head>
 <body>
 
-<h1 id="first2">Enter wikipedia Article</h1>
-<script>
-    var socketio = io();
-    function sendArt(){
-
-     socketio.emit("addArt", {userID:{{userID}},art:document.getElementById("artName").value});
-     document.getElementById("first0").style.display = "none";
-     document.getElementById("artName").style.display = "none";
-     document.getElementById("first1").style.display = "none";
-     document.getElementById("first2").style.display = "none";
-    socketio.on("startRound", (data) => {
-        var artName = data.art;
-        var guessrUserID = data.guessr;
-
-        // Voeg de waarden toe aan de gewenste HTML-elementen
-        document.getElementById("artNameDisplay").textContent = "Artikelnaam: " + artName;
-        document.getElementById("guesserDisplay").textContent = "Rader UserID: " + guessrUserID;
-    });
-    }
-
-</script>
-
-<label id="first0" for="artical">artical name:</label>
-<input  type="text" id="artName" name="artName"><br><br>
+<h1 id="first2">Enter Wikipedia Article</h1>
+<label id="first0" for="artical">Artikelnaam:</label>
+<input type="text" id="artName" name="artName"><br><br>
 <button id="first1" onclick="sendArt()">Submit</button>
+
 <!-- Voeg elementen toe om de ontvangen data weer te geven -->
 <p id="artNameDisplay"></p>
 <p id="guesserDisplay"></p>
+<p id="raderMessage"></p>
+<select id="guessersDropdown"name="guessersDropdown"></select>
+<script>
+    document.getElementById("guessersDropdown").style.display = "none";
+    var socketio = io();
+    var userID = {{userID}};
+
+    function sendArt(){
+        socketio.emit("addArt", {userID: userID, art: document.getElementById("artName").value});
+        document.getElementById("first0").style.display = "none";
+        document.getElementById("artName").style.display = "none";
+        document.getElementById("first1").style.display = "none";
+        document.getElementById("first2").style.display = "none";
+    }
+
+    socketio.on("startRound", (data) => {
+        var artName = data.art;
+        var guesserUserID = data.guesserID;
+        var guesserName= data.guesserName;
+
+        if (guesserUserID == userID) {
+            // Jij bent de rader
+            document.getElementById("raderMessage").textContent = "Jij bent de rader!";
+            document.getElementById("guessersDropdown").style.display = "block";
+
+            // Vul de dropdown-lijst met de andere spelers
+            var guessersList = document.getElementById("guessersDropdown");
+            guessersList.innerHTML = "";
+            var players = data.players;
+            for (var i = 0; i < players.length; i++) {
+                var option = document.createElement("option");
+                option.value = players[i].id;
+                option.text = players[i].name;
+                guessersList.appendChild(option);
+            }
+        } else {
+            // Andere speler is de rader
+            document.getElementById("raderMessage").textContent = "De rader is: " + guesserName;
+            document.getElementById("artNameDisplay").textContent = "Artikelnaam: " + artName;
+            document.getElementById("guessersDropdown").style.display = "none";
+        }
+
+    });
+
+</script>
 
 
-</body>
-</html>
+
+<!-- Dropdown-

@@ -49,11 +49,9 @@ class wikigame:
     def getArtical(self, userID):
         if userID in self.players:
             temp = self.articals
-            print(temp)
-            temp.pop(userID)
+            temp.pop(int(userID))
             art = random.choice(list(temp.items()))
-            print(art)
-            return art
+            return art[1]
         else:
             return "game not joined"
     def check(self):
@@ -184,6 +182,7 @@ def on_leave(data):
 def on_start(data):
     print("started")
     games[data['gameCode']].start = True
+    print(data['gameCode'])
     socketio.emit("startGame",to=data['gameCode'])
 
 
@@ -191,17 +190,28 @@ def on_start(data):
 def addArt(data):
     userID = data['userID']
     art = data["art"]
-    gameCode= session.get("gameCode")
-    games[gameCode].addArtical(art,userID)
+    gameCode = session.get("gameCode")
+    games[gameCode].addArtical(art, userID)
 
     if games[gameCode].check():
-        guessr = random.choice(games[gameCode].players)
-        socketio.emit("startRound",{art:games[gameCode].getArtical(guessr),"guessr":getUserData(guessr)[0]}, to=gameCode)
+        guesser = random.choice(games[gameCode].players)
+        guessers = [
+            {"id": player, "name": getUserData(player)[0]}
+            for player in games[gameCode].players
+            if player != guesser
+        ]
 
+        data = {
+            "art": games[gameCode].getArtical(guesser),
+            "guesserID" :guesser,
+            "guesserName": getUserData(guesser)[0],
+            "players": guessers
+        }
+        print("send")
+        socketio.emit("startRound", data)
 
-
-
-
+#VNYXQXQS
+#VNYXQXQS
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
