@@ -53,9 +53,10 @@
 <div style="align-items: center; display: flex; justify-content: center; padding: 4rem 0">
 <div id="list"></div>
 </div>
-
+<button id="submitButton" onclick="submitGuess()">Submit</button>
 
 <script>
+    document.getElementById("submitButton").style.display = "none";
     var socketio = io();
     var userID = {{userID}};
 
@@ -65,6 +66,7 @@
         document.getElementById("artName").style.display = "none";
         document.getElementById("first1").style.display = "none";
         document.getElementById("first2").style.display = "none";
+
     }
 
     socketio.on("startRound", (data) => {
@@ -87,6 +89,8 @@
         listItem.innerHTML = guesser.name;
         listItem.className = "draggable";
         list.appendChild(listItem);
+        document.getElementById("submitButton").style.display = "block";
+
     }
         } else {
             // Andere speler is de rader
@@ -335,6 +339,10 @@
                 [].slice.call(list.querySelectorAll('.draggable')).forEach(function (item) {
                     item.addEventListener('mousedown', mouseDownHandler);
                 });
+    function submitGuess() {
+            var guess = document.getElementById("list").innerText;;
+            socketio.emit("submitGuess", {"guess": guess});
+    }
 
 
 

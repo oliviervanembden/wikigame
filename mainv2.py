@@ -212,6 +212,11 @@ def addArt(data):
 
 #VNYXQXQS
 #VNYXQXQS
+#submitGuess
+@socketio.on('submitGuess')
+def submitGuess(data):
+    guess=data['guess'].split('\n')
+    socketio.emit("subbedGuess", data)
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
