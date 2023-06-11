@@ -70,15 +70,37 @@ class wikigame:
         else:
             return False
     def subGuess(self, guesse):
-        pun = correctGuesRew / len(self.players)
+        print("subGuess")
+        print(guesse)
+        pun = correctGuesRew / (len(self.players)-2)
+        print(pun)
+
         tot= copy.deepcopy(correctGuesRew)
-        correct =getUserData(self.correct)[1]
+        correct =self.correct
         print(correct)
-        for a in len(guesse):
-            if guesse[a]== correct:
-                
+        print(guesse)
+        points = {}
+
+        for b in self.players:
+            points[b] = 0
+        for a in guesse:
+            if int(a) == correct:
+                print("hallo")
+                points[self.guesser] = tot
+                points[a] = tot/2
+
             else:
-                tot -= pun
+                points[a] = tot
+            tot -= pun
+        retGuese= []
+        retPoints = {}
+        for a in points:
+            retPoints[getUserData(a)[0]]= points[a]
+
+        for a in guesse:
+            retGuese.append(getUserData(a)[0])
+
+        return {"order": retGuese,"correct":getUserData(self.correct)[0], "points":retPoints}
 
 
 
@@ -237,7 +259,8 @@ def addArt(data):
 #submitGuess
 @socketio.on('submitGuess')
 def submitGuess(data):
-    socketio.emit("subbedGuess", games[session['gameCode']].subGuess(data))
+    print(games)
+    socketio.emit("subbedGuess", games[str(session['gameCode'])].subGuess(data))
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
