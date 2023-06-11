@@ -54,31 +54,87 @@
 <div id="list"></div>
 </div>
 <button id="submitButton" onclick="submitGuess()">Submit</button>
+
+<div id="submittedArticle">
+    <p id="articleDisplay"></p>
+    <button id="editButton" onclick="editArticle()">Bewerken</button>
+</div>
+
+
+
 <!-- Geraden volgorde -->
-<h2>Geraden volgorde:</h2>
+<h2 id="res1">Geraden volgorde:</h2>
 <ul id="orderList"></ul>
 
 <!-- Het echte artikel -->
-<h2>Het echte artikel:</h2>
+<h2 id="res2">Het echte artikel:</h2>
 <p id="correctArticle"></p>
 
 <!-- Punten -->
-<h2>Punten:</h2>
+<h2 id="res3">Punten:</h2>
 <ul id="pointsList"></ul>
 
 <script>
     document.getElementById("submitButton").style.display = "none";
     var socketio = io();
     var userID = {{userID}};
+    document.getElementById("res1").style.display = "none";
+    document.getElementById("res2").style.display = "none";
+    document.getElementById("res3").style.display = "none";
+    document.getElementById("editButton").style.display = "none";
 
-    function sendArt(){
-        socketio.emit("addArt", {userID: userID, art: document.getElementById("artName").value});
-        document.getElementById("first0").style.display = "none";
-        document.getElementById("artName").style.display = "none";
-        document.getElementById("first1").style.display = "none";
-        document.getElementById("first2").style.display = "none";
+function sendArt() {
+    var article = document.getElementById("artName").value;
+    socketio.emit("addArt", {userID: userID, art: article});
 
-    }
+    // Display the submitted article
+    document.getElementById("articleDisplay").textContent = article;
+    document.getElementById("submittedArticle").style.display = "block";
+
+    // Hide the input fields and submit button
+    document.getElementById("first0").style.display = "none";
+    document.getElementById("artName").style.display = "none";
+    document.getElementById("first1").style.display = "none";
+    document.getElementById("first2").style.display = "none";
+    document.getElementById("editButton").style.display = "block";
+}
+function editArticle() {
+    var articleDisplay = document.getElementById("articleDisplay");
+    var article = articleDisplay.textContent;
+
+    // Replace the paragraph with an input field to edit the article
+    var inputField = document.createElement("input");
+    inputField.type = "text";
+    inputField.id = "repart";
+    inputField.value = article;
+    articleDisplay.parentNode.replaceChild(inputField, articleDisplay);
+
+    // Focus on the input field and select its content
+    inputField.focus();
+    inputField.select();
+
+    // Update the submit button to save the edited article
+    var editButton = document.getElementById("editButton");
+    editButton.textContent = "Opslaan";
+    editButton.onclick = saveArticle;
+}
+
+function saveArticle() {
+
+    // Update the displayed article
+    document.getElementById("articleDisplay").innerText = document.getElementById("repart").value;
+
+    // Restore the original paragraph and edit button
+    var articleDisplay = document.getElementById("articleDisplay");
+    var paragraph = document.createElement("p");
+    paragraph.id = "articleDisplay";
+    paragraph.textContent = editedArticle;
+    articleDisplay.parentNode.replaceChild(paragraph, articleDisplay);
+
+    var editButton = document.getElementById("editButton");
+    editButton.textContent = "Bewerken";
+    editButton.onclick = editArticle;
+}
 socketio.on("startRound", (data) => {
     var artName = data.art;
     var guesserUserID = data.guesserID;
@@ -123,6 +179,9 @@ function submitGuess() {
     socketio.emit("submitGuess", guessIDs);
 };
 socketio.on("subbedGuess", (data) => {
+    document.getElementById("res1").style.display = "block";
+    document.getElementById("res2").style.display = "block";
+    document.getElementById("res3").style.display = "block";
     var order = data.order;
     var correct = data.correct;
     var points = data.points;
