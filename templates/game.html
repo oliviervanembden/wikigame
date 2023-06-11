@@ -68,39 +68,51 @@
         document.getElementById("first2").style.display = "none";
 
     }
+socketio.on("startRound", (data) => {
+    var artName = data.art;
+    var guesserUserID = data.guesserID;
+    var guesserName = data.guesserName;
+    var guessers = data.players;
 
-    socketio.on("startRound", (data) => {
-        var artName = data.art;
-        var guesserUserID = data.guesserID;
-        var guesserName= data.guesserName;
-        var guessers = data.players;
+    if (guesserUserID == userID) {
+        // Jij bent de rader
+        document.getElementById("raderMessage").textContent = "Jij bent de rader!";
 
-        if (guesserUserID == userID) {
-            // Jij bent de rader
-            document.getElementById("raderMessage").textContent = "Jij bent de rader!";
+        // Vul de dropdown-lijst met de andere spelers
+        var list = document.getElementById("list");
+        list.innerHTML = "";
 
-            // Vul de dropdown-lijst met de andere spelers
-            var list = document.getElementById("list");
-            list.innerHTML = "";
-    // Voeg de guessers toe aan de lijst met verschuifbare elementen
-    for (var i = 0; i < guessers.length; i++) {
-        var guesser = guessers[i];
-        var listItem = document.createElement("div");
-        listItem.innerHTML = guesser.name;
-        listItem.className = "draggable";
-        list.appendChild(listItem);
-        document.getElementById("submitButton").style.display = "block";
-
-    }
-        } else {
-            // Andere speler is de rader
-            document.getElementById("raderMessage").textContent = "De rader is: " + guesserName;
-            document.getElementById("artNameDisplay").textContent = "Artikelnaam: " + artName;
-
-
+        // Voeg de guessers toe aan de lijst met verschuifbare elementen
+        for (var i = 0; i < guessers.length; i++) {
+            var guesser = guessers[i];
+            var listItem = document.createElement("div");
+            listItem.innerHTML = guesser.name;
+            listItem.className = "draggable";
+            listItem.value = guesser.id; // Voeg de userID toe als value
+            list.appendChild(listItem);
+            document.getElementById("submitButton").style.display = "block";
         }
+    } else {
+        // Andere speler is de rader
+        document.getElementById("raderMessage").textContent = "De rader is: " + guesserName;
+        document.getElementById("artNameDisplay").textContent = "Artikelnaam: " + artName;
+    }
+});
+function submitGuess() {
+    var listItems = document.getElementsByClassName("draggable");
+    var guessIDs = [];
 
+    // Haal de ID's op van de listItems en voeg ze toe aan de guessIDs-array
+    for (var i = 0; i < listItems.length; i++) {
+        var listItem = listItems[i];
+        var guessID = listItem.value;
+        guessIDs.push(guessID);
+    }
 
+    socketio.emit("submitGuess", guessIDs);
+}
+</script>
+<script>
                 let draggingEle;
                 let placeholder;
                 let isDraggingStarted = false;
@@ -339,10 +351,7 @@
                 [].slice.call(list.querySelectorAll('.draggable')).forEach(function (item) {
                     item.addEventListener('mousedown', mouseDownHandler);
                 });
-    function submitGuess() {
-            var guess = document.getElementById("list").innerText;;
-            socketio.emit("submitGuess", {"guess": guess});
-    }
+
 
 
 

@@ -1,5 +1,4 @@
 import sqlite3
-import flask
 import json
 import random
 from flask import Flask, request, jsonify, render_template, make_response, session, redirect, url_for
@@ -11,6 +10,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 games = {}
+correctGuesRew=40
 
 
 def getUserData(ID):
@@ -27,12 +27,15 @@ def idToName(list):
     return tempList
 
 class wikigame:
+
     def __init__(self, ownerID, gameCode):
+        self.guesser = None
         self.owner = ownerID
         self.articals = {}
         self.players = [ownerID]
         self.gameCode = gameCode
         self.start = False
+        self.correct = ""
 
     def joinGame(self, userID):
         self.players.append(userID)
@@ -44,13 +47,18 @@ class wikigame:
         self.players.remove(userID)
 
     def addArtical(self, name, ownerid):
+
+
         self.articals[ownerid] = name
 
     def getArtical(self, userID):
+        self.guesser = userID
         if userID in self.players:
             temp = self.articals
             temp.pop(int(userID))
             art = random.choice(list(temp.items()))
+            self.correct = art[0]
+
             return art[1]
         else:
             return "game not joined"
@@ -61,6 +69,20 @@ class wikigame:
             return True
         else:
             return False
+    def subGuess(self, guesse):
+        pun = correctGuesRew / len(self.players)
+        tot= copy.deepcopy(correctGuesRew)
+        correct =getUserData(self.correct)[1]
+        print(correct)
+        for a in len(guesse):
+            if guesse[a]== correct:
+                
+            else:
+                tot -= pun
+
+
+
+
 
 
 def generateCode():
@@ -215,8 +237,7 @@ def addArt(data):
 #submitGuess
 @socketio.on('submitGuess')
 def submitGuess(data):
-    guess=data['guess'].split('\n')
-    socketio.emit("subbedGuess", data)
+    socketio.emit("subbedGuess", games[session['gameCode']].subGuess(data))
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
