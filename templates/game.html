@@ -128,6 +128,7 @@ function editArticle() {
 function saveArticle() {
 
     // Update the displayed article
+    socketio.emit("addArt", {userID: userID, art: document.getElementById("repart").value});
     document.getElementById("articleDisplay").innerText = document.getElementById("repart").value;
     var articleDisplay = document.getElementById("articleDisplay");
     var paragraph = document.createElement("p");
