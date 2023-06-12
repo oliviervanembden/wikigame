@@ -13,7 +13,7 @@
 
     </script>
     <style>
-
+            .flex { display : flex }
             .draggable {
                 cursor: move;
                 margin-bottom: 1rem;
@@ -46,6 +46,15 @@
 <input type="text" id="artName" name="artName"><br><br>
 <button id="first1" onclick="sendArt()">Submit</button>
 
+<div id="submittedArticle">
+    <div class="flex">
+        <p>Your artical is: </p>
+        <p id="articleDisplay"></p>
+    </div>
+    <input type="text" id ="repart">
+    <button id="editButton" onclick="editArticle()">Bewerken</button>
+</div>
+
 <!-- Voeg elementen toe om de ontvangen data weer te geven -->
 <p id="artNameDisplay"></p>
 <p id="guesserDisplay"></p>
@@ -54,12 +63,6 @@
 <div id="list"></div>
 </div>
 <button id="submitButton" onclick="submitGuess()">Submit</button>
-
-<div id="submittedArticle">
-    <p id="articleDisplay"></p>
-    <button id="editButton" onclick="editArticle()">Bewerken</button>
-</div>
-
 
 
 <!-- Geraden volgorde -->
@@ -75,6 +78,7 @@
 <ul id="pointsList"></ul>
 
 <script>
+    document.getElementById("submittedArticle").style.display = "none";
     document.getElementById("submitButton").style.display = "none";
     var socketio = io();
     var userID = {{userID}};
@@ -82,6 +86,7 @@
     document.getElementById("res2").style.display = "none";
     document.getElementById("res3").style.display = "none";
     document.getElementById("editButton").style.display = "none";
+    document.getElementById("repart").style.display = "none";
 
 function sendArt() {
     var article = document.getElementById("artName").value;
@@ -97,17 +102,16 @@ function sendArt() {
     document.getElementById("first1").style.display = "none";
     document.getElementById("first2").style.display = "none";
     document.getElementById("editButton").style.display = "block";
+    document.getElementById("submittedArticle").style.display = "block";
 }
 function editArticle() {
     var articleDisplay = document.getElementById("articleDisplay");
     var article = articleDisplay.textContent;
 
     // Replace the paragraph with an input field to edit the article
-    var inputField = document.createElement("input");
-    inputField.type = "text";
-    inputField.id = "repart";
+    var inputField = document.getElementById("repart");
     inputField.value = article;
-    articleDisplay.parentNode.replaceChild(inputField, articleDisplay);
+    inputField.style.display = "block";
 
     // Focus on the input field and select its content
     inputField.focus();
@@ -116,24 +120,27 @@ function editArticle() {
     // Update the submit button to save the edited article
     var editButton = document.getElementById("editButton");
     editButton.textContent = "Opslaan";
-    editButton.onclick = saveArticle;
+    editButton.setAttribute('onclick','saveArticle()')
+
+
 }
 
 function saveArticle() {
 
     // Update the displayed article
     document.getElementById("articleDisplay").innerText = document.getElementById("repart").value;
-
-    // Restore the original paragraph and edit button
     var articleDisplay = document.getElementById("articleDisplay");
     var paragraph = document.createElement("p");
     paragraph.id = "articleDisplay";
-    paragraph.textContent = editedArticle;
+    paragraph.textContent = document.getElementById("repart").value;
     articleDisplay.parentNode.replaceChild(paragraph, articleDisplay);
 
     var editButton = document.getElementById("editButton");
     editButton.textContent = "Bewerken";
     editButton.onclick = editArticle;
+    document.getElementById("repart").style.display = "none";
+
+
 }
 socketio.on("startRound", (data) => {
     var artName = data.art;

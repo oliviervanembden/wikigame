@@ -11,7 +11,8 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 games = {}
 correctGuesRew=40
-
+def addPoints(id,points): # temp add real code later
+    print(f"add {points} to {id}")
 
 def getUserData(ID):
     conn = sqlite3.connect('data.db')
@@ -87,10 +88,14 @@ class wikigame:
             if int(a) == correct:
                 print("hallo")
                 points[self.guesser] = tot
+                addPoints(self.guesser, tot)
                 points[a] = tot/2
+                addPoints(a,tot)
 
             else:
                 points[a] = tot
+                addPoints(a,tot)
+
             tot -= pun
         retGuese= []
         retPoints = {}
