@@ -12,7 +12,12 @@ socketio = SocketIO(app)
 games = {}
 correctGuesRew=40
 def addPoints(id,points): # temp add real code later
-    print(f"add {points} to {id}")
+    conn = sqlite3.connect('data.db')
+    c = conn.cursor()
+    c.execute(f"SELECT points FROM user WHERE ID='{id}'")
+    userData = c.fetchone()
+    totalPoints = int(userData)+int(points)
+
 
 def getUserData(ID):
     conn = sqlite3.connect('data.db')
@@ -55,17 +60,17 @@ class wikigame:
     def getArtical(self, userID):
         self.guesser = userID
         if userID in self.players:
-            temp = self.articals
+            temp = copy.deepcopy(self.articals)
             temp.pop(int(userID))
             art = random.choice(list(temp.items()))
             self.correct = art[0]
+            self.articals.pop(art[0])
 
             return art[1]
         else:
             return "game not joined"
     def check(self):
-        print(len(self.articals))
-        print(len(self.players))
+        print(self.articals)
         if len(self.articals) == len(self.players):
             return True
         else:
@@ -115,7 +120,7 @@ class wikigame:
 def generateCode():
     while True:
         code = ""
-        for _ in range(8):
+        for _ in range(2):
             code += random.choice(ascii_uppercase)
 
         if code not in games:
@@ -218,14 +223,18 @@ def on_join(data):
     socketio.emit("addUser",getUserData(userID)[0], to=room)
 
 
-@socketio.on('leave')
+@socketio.on('leave') #
 def on_leave(data):
     username = data['username']
     room = data['gameCode']
     leave_room(room)
     socketio.emit("delUser", username, to=room)
 
+@socketio.on('nextRound')
+def nextRound(data):
 
+    socketio.emit("next",games[str(session['gameCode'])].correct)
+    
 
 @socketio.on('start')
 def on_start(data):
@@ -264,8 +273,8 @@ def addArt(data):
 #submitGuess
 @socketio.on('submitGuess')
 def submitGuess(data):
-    print(games)
+    print(data)
     socketio.emit("subbedGuess", games[str(session['gameCode'])].subGuess(data))
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', debug=True, allow_unsafe_werkzeug=True)

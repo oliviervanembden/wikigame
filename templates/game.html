@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <title>Title</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
@@ -11,41 +12,68 @@
             socket.emit('my event', {data: 'I\'m connected!'});
         });
 
+
+
     </script>
+    <meta name="viewport" content="width=1280, initial-scale=1">
+    <script>       
+      document.querySelector('meta[name="viewport"]').setAttribute('content', 'width='+screen.width+', initial-scale=1');
+      </script>
+    </head>
     <style>
-            .flex { display : flex }
-            .draggable {
-                cursor: move;
-                margin-bottom: 1rem;
-                user-select: none;
+.flex { display : flex }
 
-                /* Center the content */
-                align-items: center;
-                display: flex;
-                justify-content: center;
+[draggable] {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Required to make elements draggable in old WebKit */
+  -khtml-user-drag: element;
+  -webkit-user-drag: element;
+}
 
-                /* Size */
-                height: 4rem;
-                width: 16rem;
+#columns {
+  list-style-type: none;
+}
 
-                /* Misc */
-                border: 1px solid #cbd5e0;
-            }
-            .placeholder {
-                background-color: #edf2f7;
-                border: 2px dashed #cbd5e0;
-                margin-bottom: 1rem;
-            }
+.column {
+  width: 162px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  text-align: center;
+  cursor: move;
+}
+.column header {
+  height: 20px;
+  width: 150px;
+  color: black;
+  background-color: #ccc;
+  padding: 5px;
+  border-bottom: 1px solid #ddd;
+  border-radius: 10px;
+  border: 2px solid #666666;
+}
 
+.column.dragElem {
+  opacity: 0.4;
+}
+.column.over {
+  border: 2px dashed #000;
+  border-top: 2px solid blue;
+}
     </style>
+
 </head>
 <body>
 
+
+<div id="inputScreen">
 <h1 id="first2">Enter Wikipedia Article</h1>
 <label id="first0" for="artical">Artikelnaam:</label>
 <input type="text" id="artName" name="artName"><br><br>
 <button id="first1" onclick="sendArt()">Submit</button>
-
+</div>
 <div id="submittedArticle">
     <div class="flex">
         <p>Your artical is: </p>
@@ -56,15 +84,22 @@
 </div>
 
 <!-- Voeg elementen toe om de ontvangen data weer te geven -->
+<div id="input">
 <p id="artNameDisplay"></p>
 <p id="guesserDisplay"></p>
 <p id="raderMessage"></p>
-<div style="align-items: center; display: flex; justify-content: center; padding: 4rem 0">
-<div id="list"></div>
+<div id="rader">
+<div  style="align-items: center; display: flex; justify-content: center; padding: 4rem 0">
+    <ul id="columns"></ul>
+    
 </div>
 <button id="submitButton" onclick="submitGuess()">Submit</button>
+</div>
 
 
+</div>
+</div>
+<div id="res">
 <!-- Geraden volgorde -->
 <h2 id="res1">Geraden volgorde:</h2>
 <ul id="orderList"></ul>
@@ -76,15 +111,18 @@
 <!-- Punten -->
 <h2 id="res3">Punten:</h2>
 <ul id="pointsList"></ul>
+<button id="nextRoundBtn" onclick='socketio.emit("nextRound",{{userID}});'>next round</button>
+</div>
 
 <script>
+
+    document.getElementById("nextRoundBtn").style.display = "none";
+    var isGessur = false;
     document.getElementById("submittedArticle").style.display = "none";
     document.getElementById("submitButton").style.display = "none";
     var socketio = io();
     var userID = {{userID}};
-    document.getElementById("res1").style.display = "none";
-    document.getElementById("res2").style.display = "none";
-    document.getElementById("res3").style.display = "none";
+    document.getElementById("res").style.display = "none";
     document.getElementById("editButton").style.display = "none";
     document.getElementById("repart").style.display = "none";
 
@@ -97,10 +135,7 @@ function sendArt() {
     document.getElementById("submittedArticle").style.display = "block";
 
     // Hide the input fields and submit button
-    document.getElementById("first0").style.display = "none";
-    document.getElementById("artName").style.display = "none";
-    document.getElementById("first1").style.display = "none";
-    document.getElementById("first2").style.display = "none";
+    document.getElementById("inputScreen").style.display = "none";
     document.getElementById("editButton").style.display = "block";
     document.getElementById("submittedArticle").style.display = "block";
 }
@@ -125,6 +160,7 @@ function editArticle() {
 
 }
 
+
 function saveArticle() {
 
     // Update the displayed article
@@ -147,48 +183,64 @@ socketio.on("startRound", (data) => {
     var guesserUserID = data.guesserID;
     var guesserName = data.guesserName;
     var guessers = data.players;
+    document.getElementById("submittedArticle").style.display = "none";
+    document.getElementById("input").style.display = "block";
 
     if (guesserUserID == userID) {
         // Jij bent de rader
+        isGessur = true;
         document.getElementById("raderMessage").textContent = "Jij bent de rader!";
+        document.getElementById("rader").style.display = "block";
 
         // Vul de dropdown-lijst met de andere spelers
-        var list = document.getElementById("list");
+        var list = document.getElementById("columns");
         list.innerHTML = "";
 
         // Voeg de guessers toe aan de lijst met verschuifbare elementen
         for (var i = 0; i < guessers.length; i++) {
+            
             var guesser = guessers[i];
+            console.log(guesser.id);
             var listItem = document.createElement("div");
             listItem.innerHTML = guesser.name;
-            listItem.className = "draggable";
-            listItem.value = guesser.id; // Voeg de userID toe als value
+            listItem.draggable= true;
+            listItem.className = "column";
+            listItem.setAttribute('data-value',guesser.id); // Voeg de userID toe als value
             list.appendChild(listItem);
             document.getElementById("submitButton").style.display = "block";
         }
+        var cols = document.querySelectorAll('#columns .column');
+[].forEach.call(cols, addDnDHandlers);
+
+
     } else {
         // Andere speler is de rader
+        isGessur = false;
         document.getElementById("raderMessage").textContent = "De rader is: " + guesserName;
-        document.getElementById("artNameDisplay").textContent = "Artikelnaam: " + artName;
+        document.getElementById("rader").style.display = "none";
+        
     }
+    document.getElementById("artNameDisplay").textContent = "Artikelnaam: " + artName;
 });
 function submitGuess() {
-    var listItems = document.getElementsByClassName("draggable");
+    var listItems = document.getElementsByClassName("columns");
     var guessIDs = [];
 
     // Haal de ID's op van de listItems en voeg ze toe aan de guessIDs-array
-    for (var i = 0; i < listItems.length; i++) {
-        var listItem = listItems[i];
-        var guessID = listItem.value;
-        guessIDs.push(guessID);
-    }
+    var columns = document.getElementById("columns"); // Het ul-element met id "columns"
+  var divs = columns.getElementsByTagName("div"); // Alle div-elementen binnen het ul-element
+
+  for (var i = 0; i < divs.length; i++) {
+    var div = divs[i];
+    var text = div.getAttribute('data-value'); // De tekstinhoud van de div zonder eventuele voorloop- of naloopspaties
+    guessIDs.push(text); // Voeg de tekstinhoud toe aan de array
+  }
 
     socketio.emit("submitGuess", guessIDs);
 };
 socketio.on("subbedGuess", (data) => {
-    document.getElementById("res1").style.display = "block";
-    document.getElementById("res2").style.display = "block";
-    document.getElementById("res3").style.display = "block";
+    document.getElementById("res").style.display = "block";
+    document.getElementById("input").style.display = "none";
     var order = data.order;
     var correct = data.correct;
     var points = data.points;
@@ -219,127 +271,104 @@ socketio.on("subbedGuess", (data) => {
         listItem.textContent = playerName + " - " + playerPoints + " punten";
         pointsList.appendChild(listItem);
     }
+    if (isGessur){
+        document.getElementById("nextRoundBtn").style.display = "block";
+    } else{
+        document.getElementById("nextRoundBtn").style.display = "none";
+    }
+    
+});
+socketio.on("next", (data) => {
+    document.getElementById("res").style.display = "none";
+    if (userID == data){
+        document.getElementById("inputScreen").style.display = "block";
+
+    } else{
+        document.getElementById("submittedArticle").style.display = "block";
+
+
+    }
+    console.log(data);
+
 });
 
-</script>
-<script>
-                let draggingEle;
-                let placeholder;
-                let isDraggingStarted = false;
-
-                // The current position of mouse relative to the dragging element
-                let x = 0;
-                let y = 0;
-
-                // Swap two nodes
-                const swap = function (nodeA, nodeB) {
-                    const parentA = nodeA.parentNode;
-                    const siblingA = nodeA.nextSibling === nodeB ? nodeA : nodeA.nextSibling;
-
-                    // Move `nodeA` to before the `nodeB`
-                    nodeB.parentNode.insertBefore(nodeA, nodeB);
-
-                    // Move `nodeB` to before the sibling of `nodeA`
-                    parentA.insertBefore(nodeB, siblingA);
-                };
-
-                // Check if `nodeA` is above `nodeB`
-                const isAbove = function (nodeA, nodeB) {
-                    // Get the bounding rectangle of nodes
-                    const rectA = nodeA.getBoundingClientRect();
-                    const rectB = nodeB.getBoundingClientRect();
-
-                    return rectA.top + rectA.height / 2 < rectB.top + rectB.height / 2;
-                };
-
-                const mouseDownHandler = function (e) {
-                    draggingEle = e.target;
-
-                    // Calculate the mouse position
-                    const rect = draggingEle.getBoundingClientRect();
-                    x = e.pageX - rect.left;
-                    y = e.pageY - rect.top;
-
-                    // Attach the listeners to `document`
-                    document.addEventListener('mousemove', mouseMoveHandler);
-                    document.addEventListener('mouseup', mouseUpHandler);
-                };
-
-                const mouseMoveHandler = function (e) {
-                    const draggingRect = draggingEle.getBoundingClientRect();
-
-                    if (!isDraggingStarted) {
-                        isDraggingStarted = true;
-
-                        // Let the placeholder take the height of dragging element
-                        // So the next element won't move up
-                        placeholder = document.createElement('div');
-                        placeholder.classList.add('placeholder');
-                        draggingEle.parentNode.insertBefore(placeholder, draggingEle.nextSibling);
-                        placeholder.style.height = `${draggingRect.height}px`;
-                    }
-
-                    // Set position for dragging element
-                    draggingEle.style.position = 'absolute';
-                    draggingEle.style.top = `${e.pageY - y}px`;
-                    draggingEle.style.left = `${e.pageX - x}px`;
-
-                    // The current order
-                    // prevEle
-                    // draggingEle
-                    // placeholder
-                    // nextEle
-                    const prevEle = draggingEle.previousElementSibling;
-                    const nextEle = placeholder.nextElementSibling;
-
-                    // The dragging element is above the previous element
-                    // User moves the dragging element to the top
-                    if (prevEle && isAbove(draggingEle, prevEle)) {
-                        // The current order    -> The new order
-                        // prevEle              -> placeholder
-                        // draggingEle          -> draggingEle
-                        // placeholder          -> prevEle
-                        swap(placeholder, draggingEle);
-                        swap(placeholder, prevEle);
-                        return;
-                    }
-
-                    // The dragging element is below the next element
-                    // User moves the dragging element to the bottom
-                    if (nextEle && isAbove(nextEle, draggingEle)) {
-                        // The current order    -> The new order
-                        // draggingEle          -> nextEle
-                        // placeholder          -> placeholder
-                        // nextEle              -> draggingEle
-                        swap(nextEle, placeholder);
-                        swap(nextEle, draggingEle);
-                    }
-                };
-
-                const mouseUpHandler = function () {
-                    // Remove the placeholder
-                    placeholder && placeholder.parentNode.removeChild(placeholder);
-
-                    draggingEle.style.removeProperty('top');
-                    draggingEle.style.removeProperty('left');
-                    draggingEle.style.removeProperty('position');
-
-                    x = null;
-                    y = null;
-                    draggingEle = null;
-                    isDraggingStarted = false;
-
-                    // Remove the handlers of `mousemove` and `mouseup`
-                    document.removeEventListener('mousemove', mouseMoveHandler);
-                    document.removeEventListener('mouseup', mouseUpHandler);
-                };
-
-                // Query all items
-                [].slice.call(list.querySelectorAll('.draggable')).forEach(function (item) {
-                    item.addEventListener('mousedown', mouseDownHandler);
-                });
 
 
+var dragSrcEl = null;
+
+function handleDragStart(e) {
+  // Target (this) element is the source node.
+  dragSrcEl = this;
+
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', this.outerHTML);
+
+  this.classList.add('dragElem');
+}
+function handleDragOver(e) {
+  if (e.preventDefault) {
+    e.preventDefault(); // Necessary. Allows us to drop.
+  }
+  this.classList.add('over');
+
+  e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
+
+  return false;
+}
+
+function handleDragEnter(e) {
+  // this / e.target is the current hover target.
+}
+
+function handleDragLeave(e) {
+  this.classList.remove('over');  // this / e.target is previous target element.
+}
+
+function handleDrop(e) {
+  // this/e.target is current target element.
+
+  if (e.stopPropagation) {
+    e.stopPropagation(); // Stops some browsers from redirecting.
+  }
+
+  // Don't do anything if dropping the same column we're dragging.
+  if (dragSrcEl != this) {
+    // Set the source column's HTML to the HTML of the column we dropped on.
+    //alert(this.outerHTML);
+    //dragSrcEl.innerHTML = this.innerHTML;
+    //this.innerHTML = e.dataTransfer.getData('text/html');
+    this.parentNode.removeChild(dragSrcEl);
+    var dropHTML = e.dataTransfer.getData('text/html');
+    this.insertAdjacentHTML('beforebegin',dropHTML);
+    var dropElem = this.previousSibling;
+    addDnDHandlers(dropElem);
+    
+  }
+  this.classList.remove('over');
+  return false;
+}
+
+function handleDragEnd(e) {
+  // this/e.target is the source node.
+  this.classList.remove('over');
+
+  /*[].forEach.call(cols, function (col) {
+    col.classList.remove('over');
+  });*/
+}
+
+function addDnDHandlers(elem) {
+  elem.addEventListener('dragstart', handleDragStart, false);
+  elem.addEventListener('dragenter', handleDragEnter, false)
+  elem.addEventListener('dragover', handleDragOver, false);
+  elem.addEventListener('dragleave', handleDragLeave, false);
+  elem.addEventListener('drop', handleDrop, false);
+  elem.addEventListener('dragend', handleDragEnd, false);
+
+}
+
+var cols = document.querySelectorAll('#columns .column');
+[].forEach.call(cols, addDnDHandlers);
 
 
 
