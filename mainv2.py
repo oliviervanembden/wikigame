@@ -48,7 +48,7 @@ class wikigame:
         self.gameCode = gameCode
         self.start = False
         self.correct = ""
-        self.gamestate = 0
+        self.gamestate = 0 #0 for add arical 1 for change articla so do not set here 2 guessing 3 for resolts 4 for in lobby
 
     def joinGame(self, userID):
         self.players.append(userID)
