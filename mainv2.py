@@ -14,10 +14,16 @@ correctGuesRew=40
 def addPoints(id,points): # temp add real code later
     conn = sqlite3.connect('data.db')
     c = conn.cursor()
-    c.execute(f"SELECT points FROM user WHERE ID='{id}'")
+    c.execute(f"SELECT * FROM user WHERE ID='{id}'")
     userData = c.fetchone()
-    totalPoints = int(userData)+int(points)
-
+    print("ponits:")
+    print(int(points))
+    print(userData[2])
+    print(int(userData[2]))
+    points = int(points) + int(userData[2])
+    print(points)
+    c.execute(f"UPDATE user set points = '{points}' WHERE ID ='{id}' ")
+    conn.commit()
 
 def getUserData(ID):
     conn = sqlite3.connect('data.db')
@@ -132,7 +138,7 @@ def generateCode():
 @app.route('/', methods=["POST", "GET"])
 def home():
     if request.method == "POST":
-        code = request.form.get("code").capitalize()
+        code = request.form.get("code")
         join = request.form.get("join", False)
         create = request.form.get("create", False)
         if join != False:
