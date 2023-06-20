@@ -48,7 +48,7 @@ class wikigame:
         self.gameCode = gameCode
         self.start = False
         self.correct = ""
-        self.connectedPlayers = []
+        self.gamestate = 0
 
     def joinGame(self, userID):
         self.players.append(userID)

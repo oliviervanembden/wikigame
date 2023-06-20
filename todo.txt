@@ -5,7 +5,7 @@ get site safe for open internet
 prevent sql injection
 prevent cros site scripting
 
-
+add ability to reload site
 add ability to join game while game has started
 add check for correct input
 

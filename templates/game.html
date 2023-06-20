@@ -59,7 +59,6 @@
 <button id="submitButton" onclick="submitGuess()">Submit</button>
 </div>
 
-
 </div>
 </div>
 <div id="res">
@@ -78,13 +77,12 @@
 </div>
 
 <script>
-
+    var socketio = io();
+    var userID = {{userID}};
     document.getElementById("nextRoundBtn").style.display = "none";
     var isGessur = false;
     document.getElementById("submittedArticle").style.display = "none";
     document.getElementById("submitButton").style.display = "none";
-    var socketio = io();
-    var userID = {{userID}};
     document.getElementById("res").style.display = "none";
     document.getElementById("editButton").style.display = "none";
     document.getElementById("repart").style.display = "none";
@@ -119,8 +117,6 @@ function editArticle() {
     var editButton = document.getElementById("editButton");
     editButton.textContent = "Opslaan";
     editButton.setAttribute('onclick','saveArticle()')
-
-
 }
 
 
