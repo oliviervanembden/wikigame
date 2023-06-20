@@ -13,7 +13,7 @@
 <p> U have {{points}} points</p>
 <form method="post" class="buttons">
   <div class="join">
-    <input type="text" placeholder="Game Code" name="code" value="{{code}}" />
+    <input type="text" placeholder="Game Code" pattern="[A-Z]{2}" oninput="this.value = this.value.toUpperCase()" name="code" value="{{code}}" />
     <button type="submit" name="join">Join a game</button>
   </div>
   <button type="submit" name="create" class="create-btn">Create a game</button>
