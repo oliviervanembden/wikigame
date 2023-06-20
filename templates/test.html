@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+
+<div id="rader" style="display: block;">
+  <div style="align-items: center; display: flex; justify-content: center; padding: 4rem 0">
+    <ul id="columns">
+      <div draggable="true" class="column">Speler 1</div>
+      <div draggable="true" class="column">Speler 2</div>
+      <div draggable="true" class="column">Speler 3</div>
+      <!-- Voeg hier meer <div> elementen toe voor elke speler -->
+    </ul>
+  </div>
+</div>
+
+<script>
+  var dragSrcElement = null;
+
+  function handleDragStart(e) {
+    dragSrcElement = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+    this.classList.add('dragging');
+  }
+
+  function handleDragOver(e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  }
+
+  function handleDragEnter(e) {
+    this.classList.add('over');
+  }
+
+  function handleDragLeave(e) {
+    this.classList.remove('over');
+  }
+
+  function handleDrop(e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+    if (dragSrcElement !== this) {
+      dragSrcElement.innerHTML = this.innerHTML;
+      this.innerHTML = e.dataTransfer.getData('text/html');
+    }
+    return false;
+  }
+
+  function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    var columns = document.querySelectorAll('#columns .column');
+    columns.forEach(function(column) {
+      column.classList.remove('over');
+    });
+  }
+
+  var columns = document.querySelectorAll('#columns .column');
+  columns.forEach(function(column) {
+    column.addEventListener('dragstart', handleDragStart, false);
+    column.addEventListener('dragenter', handleDragEnter, false);
+    column.addEventListener('dragover', handleDragOver, false);
+    column.addEventListener('dragleave', handleDragLeave, false);
+    column.addEventListener('drop', handleDrop, false);
+    column.addEventListener('dragend', handleDragEnd, false);
+  });
+</script>
+
+<style>
+  .column {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    cursor: move;
+  }
+
+  .dragging {
+    opacity: 0.4;
+  }
+
+  .over {
+    border-color: #ff0000;
+  }
+</style>
+
+</body>
+</html>

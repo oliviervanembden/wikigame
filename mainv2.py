@@ -132,7 +132,7 @@ def generateCode():
 @app.route('/', methods=["POST", "GET"])
 def home():
     if request.method == "POST":
-        code = request.form.get("code")
+        code = request.form.get("code").capitalize()
         join = request.form.get("join", False)
         create = request.form.get("create", False)
         if join != False:
@@ -187,6 +187,9 @@ def createGame():
     games[gameCode] = wikigame(request.cookies.get('userID'), gameCode)
     return redirect(url_for('lobby'))
 
+@app.route('/test')
+def test():
+    return render_template("test.html")
 
 @app.route('/lobby')
 def lobby():
