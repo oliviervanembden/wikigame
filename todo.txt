@@ -1,10 +1,14 @@
+fixed add auto capitilazation
+fixed bug when user re joins lobby and ohter players see name mulitipul time
+
 get site safe for open internet
 prevent sql injection
 prevent cros site scripting
 
-fix bug when user re joins lobby and ohter players see name 2x
+
 add ability to join game while game has started
 add check for correct input
-fixed add auto capitilazation
+
 add leave game button
 add leader board
+get user data need to get data from class not database 

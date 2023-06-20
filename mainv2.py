@@ -48,6 +48,7 @@ class wikigame:
         self.gameCode = gameCode
         self.start = False
         self.correct = ""
+        self.connectedPlayers = []
 
     def joinGame(self, userID):
         self.players.append(userID)
@@ -133,6 +134,19 @@ def generateCode():
             break
 
     return code
+@app.route('/addUser', methods=['POST'])
+def addUser():
+    conn = sqlite3.connect('data.db')
+    c = conn.cursor()
+    name = request.form.to_dict(flat=False)['name'][0]
+    c.execute("SELECT MAX(ID) FROM user")
+    ID = c.fetchone()
+    ID = ID[0] + 1
+    c.execute(f"INSERT INTO user VALUES ('{name}',{ID},0)")
+    conn.commit()
+    resp = make_response(render_template('accountcreated.html', name=name, ID=ID))
+    resp.set_cookie('userID', str(ID))
+    return resp
 
 
 @app.route('/', methods=["POST", "GET"])
@@ -149,11 +163,9 @@ def home():
                     games[code].players.append(ID)
                 return redirect(url_for("lobby"))
             else:
-                print("error code does noet exits")
                 return redirect(url_for("home"))
 
         if create != False:
-
             return redirect(url_for("createGame"))
 
 
@@ -170,26 +182,12 @@ def home():
             return render_template('welcomeBack.html', name=userData[0], points=userData[2])
 
 
-@app.route('/addUser', methods=['POST'])
-def addUser():
-    conn = sqlite3.connect('data.db')
-    c = conn.cursor()
-    name = request.form.to_dict(flat=False)['name'][0]
-    c.execute("SELECT MAX(ID) FROM user")
-    ID = c.fetchone()
-    ID = ID[0] + 1
-    c.execute(f"INSERT INTO user VALUES ('{name}',{ID},0)")
-    conn.commit()
-    resp = make_response(render_template('accountcreated.html', name=name, ID=ID))
-    resp.set_cookie('userID', str(ID))
-    return resp
 
 
 @app.route('/createGame')
 def createGame():
     gameCode = generateCode()
     session['gameCode'] = gameCode
-
     games[gameCode] = wikigame(request.cookies.get('userID'), gameCode)
     return redirect(url_for('lobby'))
 
@@ -201,12 +199,9 @@ def test():
 def lobby():
     gameCode =session.get("gameCode")
     userID = session.get('userID')
-    print(userID)
-    print(games[gameCode].players)
     if gameCode in games and userID in games[gameCode].players:
         tempplayer= copy.deepcopy(games[gameCode].players)
         tempplayer.remove(userID)
-        print(idToName(tempplayer))
         if games[gameCode].owner == userID:
             return render_template("lobby.html", owner=True, code=gameCode, players=idToName(tempplayer), userID=userID)
         else:
@@ -227,10 +222,10 @@ def game():
 def on_join(data):
     print("join")
     userID = data['userID']
-    room = data['gameCode']
-    join_room(room)
-    if userID not in games[gameCode].players:
-        socketio.emit("addUser",getUserData(userID)[0], to=room)
+    gameCode = data['gameCode']
+    join_room(gameCode)
+    socketio.emit("addUser",getUserData(userID)[0], to=gameCode)
+        
 
 
 @socketio.on('leave') #

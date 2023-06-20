@@ -37,22 +37,27 @@
   const players = document.getElementById("players");
 
   const addPlayer = (name) => {
-    const content = `
-    <div class="text">
-        <span>
-            <strong>${name}</strong
-        </span>
-    </div>
-    `;
+    const names = document.getElementsByClassName('name');
+    let i = 0;
+    let addName = true;
+    while (i < names.length) {
+      if (name == names[i].innerHTML){
+        addName = false;
+      }
+    i++;
+  }  
+  if(addName){
+    const content = `<div><strong class="name">${name}</strong></div>`;
     players.innerHTML += content;
+  }
+
   };
    socketio.on("addUser", (data) => {
+
     addPlayer(data);
-    console.log(data);
   });
     socketio.emit("join", { userID:{{userID}},gameCode:"{{code}}" });
   socketio.on("startGame", (data) => {
-  console.log("stated game");
   window.location.href="game";
 
   });
