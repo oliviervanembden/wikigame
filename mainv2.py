@@ -138,7 +138,7 @@ def generateCode():
 @app.route('/', methods=["POST", "GET"])
 def home():
     if request.method == "POST":
-        code = request.form.get("code")
+        code = request.form.get("code").upper()
         join = request.form.get("join", False)
         create = request.form.get("create", False)
         if join != False:
@@ -229,7 +229,8 @@ def on_join(data):
     userID = data['userID']
     room = data['gameCode']
     join_room(room)
-    socketio.emit("addUser",getUserData(userID)[0], to=room)
+    if userID not in games[gameCode].players:
+        socketio.emit("addUser",getUserData(userID)[0], to=room)
 
 
 @socketio.on('leave') #
