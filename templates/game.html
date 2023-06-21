@@ -102,6 +102,16 @@ function sendArt() {
     document.getElementById("editButton").style.display = "block";
     document.getElementById("submittedArticle").style.display = "block";
 }
+function reloadArt(article) {
+    // Display the submitted article
+    document.getElementById("articleDisplay").textContent = article;
+    document.getElementById("submittedArticle").style.display = "block";
+
+    // Hide the input fields and submit button
+    document.getElementById("inputScreen").style.display = "none";
+    document.getElementById("editButton").style.display = "block";
+    document.getElementById("submittedArticle").style.display = "block";
+}
 function editArticle() {
     var articleDisplay = document.getElementById("articleDisplay");
     var article = articleDisplay.textContent;
@@ -243,7 +253,7 @@ socketio.on("subbedGuess", (data) => {
     } else{
         document.getElementById("nextRoundBtn").style.display = "none";
     }
-    
+
 });
 socketio.on("next", (data) => {
     document.getElementById("res").style.display = "none";
@@ -258,6 +268,9 @@ socketio.on("next", (data) => {
     console.log(data);
 
 });
+if (gameState == 1){
+    reloadArt(gameData["articalName"]);
+  }
 </script>
 
 <script>
