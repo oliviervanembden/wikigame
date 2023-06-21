@@ -206,9 +206,10 @@ def game():
     if games[gameCode].start:
         data = {}
         gameState = games[gameCode].gameState
-        if gameState == 0 and userID in games[gameCode].articals:
+        print(games[gameCode].articals)
+        if gameState == 0 and int(userID) in games[gameCode].articals:
             gameState = 1
-            data = {"articalName":games[gameCode].articals[userID]}
+            data = {"articalName":games[gameCode].articals[int(userID)]}
         elif gameState == 2:
             guesser = games[gameCode].guesser
             guessers = [
