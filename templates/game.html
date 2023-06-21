@@ -77,6 +77,8 @@
 </div>
 
 <script>
+    var gameState = {{gameState}};
+    var gameData = {{gameData|safe}};
     var socketio = io();
     var userID = {{userID}};
     document.getElementById("nextRoundBtn").style.display = "none";

@@ -48,7 +48,8 @@ class wikigame:
         self.gameCode = gameCode
         self.start = False
         self.correct = ""
-        self.gamestate = 0 #0 for add arical 1 for change articla so do not set here 2 guessing 3 for resolts 4 for in lobby
+        self.gameState = 0 #0 for add arical 1 for change articla so do not set here 2 guessing 3 for resolts 4 for in lobby
+        self.submittedGues = {}
 
     def joinGame(self, userID):
         self.players.append(userID)
@@ -83,22 +84,14 @@ class wikigame:
         else:
             return False
     def subGuess(self, guesse):
-        print("subGuess")
-        print(guesse)
         pun = correctGuesRew / (len(self.players)-2)
-        print(pun)
-
         tot= copy.deepcopy(correctGuesRew)
         correct =self.correct
-        print(correct)
-        print(guesse)
         points = {}
-
         for b in self.players:
             points[b] = 0
         for a in guesse:
             if int(a) == correct:
-                print("hallo")
                 points[self.guesser] = tot
                 addPoints(self.guesser, tot)
                 points[a] = tot/2
@@ -113,14 +106,11 @@ class wikigame:
         retPoints = {}
         for a in points:
             retPoints[getUserData(a)[0]]= points[a]
-
         for a in guesse:
             retGuese.append(getUserData(a)[0])
-
-        return {"order": retGuese,"correct":getUserData(self.correct)[0], "points":retPoints}
-
-
-
+        self.submittedGues = {"order": retGuese,"correct":getUserData(self.correct)[0], "points":retPoints}
+        return self.submittedGues
+    
 
 
 
@@ -212,8 +202,29 @@ def lobby():
 @app.route('/game')
 def game():
     gameCode = session.get("gameCode")
+    userID = session.get('userID')
     if games[gameCode].start:
-        return render_template("game.html", userID=session.get('userID'))
+        data = {}
+        gameState = games[gameCode].gameState
+        if gameState == 0 and userID in games[gameCode].articals:
+            gameState = 1
+            data = {"articalName":games[gameCode].articals[userID]}
+        elif gameState == 2:
+            guesser = games[gameCode].guesser
+            guessers = [
+                {"id": player, "name": getUserData(player)[0]}
+                for player in games[gameCode].players
+                if player != guesser
+            ]
+            data = {
+                "art": games[gameCode].correct,
+                "guesserID" :guesser,
+                "guesserName": getUserData(guesser)[0],
+                "players": guessers
+            }
+        elif gameState == 4:
+            data = games[gameCode].submittedGues
+        return render_template("game.html", userID=session.get('userID'),gameData=str(json.dumps(data)),gameState=gameState)
     else:
         return redirect(url_for('lobby'))
 
@@ -270,15 +281,13 @@ def addArt(data):
             "guesserName": getUserData(guesser)[0],
             "players": guessers
         }
-        print("send")
+        games[gameCode].gameState = 2
         socketio.emit("startRound", data)
 
-#VNYXQXQS
-#VNYXQXQS
-#submitGuess
+
 @socketio.on('submitGuess')
 def submitGuess(data):
-    print(data)
+    games[str(session['gameCode'])].gameState = 3
     socketio.emit("subbedGuess", games[str(session['gameCode'])].subGuess(data))
 
 if __name__ == "__main__":
