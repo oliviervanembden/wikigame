@@ -206,6 +206,10 @@ def game():
     userID = session.get('userID')
     if gameCode in games:
         if games[gameCode].start:
+            if userID == games[gameCode].guesser:
+                isGessur = "true"
+            else:
+                isGessur = "false"
             data = {}
             gameState = games[gameCode].gameState
             print(games[gameCode].articals)
@@ -227,7 +231,8 @@ def game():
                 }
             elif gameState == 3:
                 data = games[gameCode].submittedGues
-            return render_template("game.html", userID=session.get('userID'),gameData=str(json.dumps(data)),gameState=gameState)
+
+            return render_template("game.html", userID=session.get('userID'),gameData=str(json.dumps(data)),gameState=gameState,isGessur=isGessur)
         else:
             return redirect(url_for('lobby'))
     else:
@@ -252,7 +257,8 @@ def on_leave(data):
 
 @socketio.on('nextRound')
 def nextRound(data):
-
+    gameCode = session.get("gameCode")
+    games[gameCode].gameState = 0
     socketio.emit("next",games[str(session['gameCode'])].correct)
     
 

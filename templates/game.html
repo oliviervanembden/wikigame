@@ -82,7 +82,7 @@
     var socketio = io();
     var userID = {{userID}};
     document.getElementById("nextRoundBtn").style.display = "none";
-    var isGessur = false;
+    var isGessur = {{isGessur}};
     document.getElementById("submittedArticle").style.display = "none";
     document.getElementById("submitButton").style.display = "none";
     document.getElementById("res").style.display = "none";
@@ -277,6 +277,11 @@ function submitGuess() {
 
 
 socketio.on("subbedGuess", (data) => {
+  renderSubbedGuess(data)
+  });
+
+function renderSubbedGuess(data){
+    document.getElementById("inputScreen").style.display = "none";
     document.getElementById("res").style.display = "block";
     document.getElementById("input").style.display = "none";
     var order = data.order;
@@ -309,13 +314,13 @@ socketio.on("subbedGuess", (data) => {
         listItem.textContent = playerName + " - " + playerPoints + " punten";
         pointsList.appendChild(listItem);
     }
-    if (isGessur){
+    if (isGessur){ // hier is het probleem
         document.getElementById("nextRoundBtn").style.display = "block";
     } else{
         document.getElementById("nextRoundBtn").style.display = "none";
     }
+}
 
-});
 socketio.on("next", (data) => {
     document.getElementById("res").style.display = "none";
     if (userID == data){
@@ -335,6 +340,9 @@ switch (gameState){
     break;
   case 2:
     reloadRound(gameData);
+    break;
+  case 3:
+    renderSubbedGuess(gameData)
     break;
   }
   var dragSrcElement = null;
