@@ -194,7 +194,8 @@ socketio.on("startRound", (data) => {
         // Andere speler is de rader
         isGessur = false;
         document.getElementById("raderMessage").textContent = "De rader is: " + guesserName;
-        document.getElementById("rader").style.display = "none";
+        document.getElementById("rader").style.display = "none"; 
+        document.getElementById("submitButton").style.display = "none";
         
     }
     document.getElementById("artNameDisplay").textContent = "Artikelnaam: " + artName;
@@ -323,13 +324,11 @@ function renderSubbedGuess(data){
 
 socketio.on("next", (data) => {
     document.getElementById("res").style.display = "none";
+    isGessur = false;
     if (userID == data){
         document.getElementById("inputScreen").style.display = "block";
-
     } else{
         document.getElementById("submittedArticle").style.display = "block";
-
-
     }
     console.log(data);
 
