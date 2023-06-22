@@ -50,6 +50,7 @@ class wikigame:
         self.correct = ""
         self.gameState = 0 #0 for add arical 1 for change articla so do not set here 2 guessing 3 for resolts 4 for in lobby
         self.submittedGues = {}
+        self.correctartical = ""
 
     def joinGame(self, userID):
         self.players.append(userID)
@@ -73,7 +74,7 @@ class wikigame:
             art = random.choice(list(temp.items()))
             self.correct = art[0]
             self.articals.pop(art[0])
-
+            self.correctartical = art[1]
             return art[1]
         else:
             return "game not joined"
@@ -203,32 +204,34 @@ def lobby():
 def game():
     gameCode = session.get("gameCode")
     userID = session.get('userID')
-    if games[gameCode].start:
-        data = {}
-        gameState = games[gameCode].gameState
-        print(games[gameCode].articals)
-        if gameState == 0 and int(userID) in games[gameCode].articals:
-            gameState = 1
-            data = {"articalName":games[gameCode].articals[int(userID)]}
-        elif gameState == 2:
-            guesser = games[gameCode].guesser
-            guessers = [
-                {"id": player, "name": getUserData(player)[0]}
-                for player in games[gameCode].players
-                if player != guesser
-            ]
-            data = {
-                "art": games[gameCode].correct,
-                "guesserID" :guesser,
-                "guesserName": getUserData(guesser)[0],
-                "players": guessers
-            }
-        elif gameState == 4:
-            data = games[gameCode].submittedGues
-        return render_template("game.html", userID=session.get('userID'),gameData=str(json.dumps(data)),gameState=gameState)
+    if gameCode in games:
+        if games[gameCode].start:
+            data = {}
+            gameState = games[gameCode].gameState
+            print(games[gameCode].articals)
+            if gameState == 0 and int(userID) in games[gameCode].articals:
+                gameState = 1
+                data = {"articalName":games[gameCode].articals[int(userID)]}
+            elif gameState == 2:
+                guesser = games[gameCode].guesser
+                guessers = [
+                    {"id": player, "name": getUserData(player)[0]}
+                    for player in games[gameCode].players
+                    if player != guesser
+                ]
+                data = {
+                    "art": games[gameCode].correctartical,
+                    "guesserID" :guesser,
+                    "guesserName": getUserData(guesser)[0],
+                    "players": guessers
+                }
+            elif gameState == 3:
+                data = games[gameCode].submittedGues
+            return render_template("game.html", userID=session.get('userID'),gameData=str(json.dumps(data)),gameState=gameState)
+        else:
+            return redirect(url_for('lobby'))
     else:
-        return redirect(url_for('lobby'))
-
+        return redirect(url_for('home'))
 
 @socketio.on('join')
 def on_join(data):
