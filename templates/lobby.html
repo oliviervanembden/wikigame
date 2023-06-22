@@ -3,79 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <title>Lobby</title>
-        <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
-      integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
-      crossorigin="anonymous"
-
-    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+        integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+        crossorigin="anonymous"></script>
     <meta name="viewport" content="width=1280, initial-scale=1">
-    <script>       
-      document.querySelector('meta[name="viewport"]').setAttribute('content', 'width='+screen.width+', initial-scale=1');
-      </script>
-      
+    <script>
+        document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=' + screen.width + ', initial-scale=1');
+    </script>
+    <style>
+        body {
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 32px;
+            margin-top: 50px;
+        }
+
+        h2 {
+            color: #666;
+            font-size: 24px;
+        }
+
+        p {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .player-box {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 50px;
+        }
+
+        .players {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            max-width: 400px;
+        }
+
+        .players div {
+            margin-bottom: 10px;
+        }
+
+        .players strong {
+            font-size: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 
-</head>
 <body>
-
-<center>
-  <h1>WikiGame</h1>
-    <h2>game code: {{code}}</h2>
-
-    <p>players:</p>
-</center>
-
-<div class="player-box">
     <center>
-        <div class="players" id="players"></div>
+        <h1>WikiGame</h1>
+        <h2>Game Code: {{code}}</h2>
+        <p>Players:</p>
     </center>
-</div>
 
-<script type="text/javascript">
-  var socketio = io();
-  const players = document.getElementById("players");
+    <div class="player-box">
+        <center>
+            <div class="players" id="players"></div>
+        </center>
+    </div>
 
-  const addPlayer = (name) => {
-    const names = document.getElementsByClassName('name');
-    let i = 0;
-    let addName = true;
-    while (i < names.length) {
-      if (name == names[i].innerHTML){
-        addName = false;
-      }
-    i++;
-  }  
-  if(addName){
-    const content = `<div><strong class="name">${name}</strong></div>`;
-    players.innerHTML += content;
-  }
+    <script type="text/javascript">
+        var socketio = io();
+        const players = document.getElementById("players");
 
-  };
-   socketio.on("addUser", (data) => {
+        const addPlayer = (name) => {
+            const names = document.getElementsByClassName('name');
+            let i = 0;
+            let addName = true;
+            while (i < names.length) {
+                if (name == names[i].innerHTML) {
+                    addName = false;
+                }
+                i++;
+            }
+            if (addName) {
+                const content = `<div><strong class="name">${name}</strong></div>`;
+                players.innerHTML += content;
+            }
+        };
 
-    addPlayer(data);
-  });
-    socketio.emit("join", { userID:{{userID}},gameCode:"{{code}}" });
-  socketio.on("startGame", (data) => {
-  window.location.href="game";
+        socketio.on("addUser", (data) => {
+            addPlayer(data);
+        });
 
-  });
+        socketio.emit("join", { userID: {{userID}}, gameCode: "{{code}}" });
 
-</script>
+        socketio.on("startGame", (data) => {
+            window.location.href = "game";
+        });
+    </script>
 
+    {% for player in players %}
+    <script type="text/javascript">
+        addPlayer("{{player}}");
+    </script>
+    {% endfor %}
 
-{% for player in players %}
-<script type="text/javascript">
-  addPlayer("{{player}}");
-</script>
-{% endfor %}
-
-
-  {% if owner %}
-
-<button style="text-align:center" onclick='socketio.emit("start", {gameCode:"{{code}}" })'>start game</button>
-{% endif %}
-
+    {% if owner %}
+    <button onclick='socketio.emit("start", {gameCode:"{{code}}" })'>Start Game</button>
+    {% endif %}
 </body>
 </html>
